@@ -1,4 +1,4 @@
-repo <- function(deg.vector, comp.list, numtags, N) {
+repo <- function(deg.vector, comp.list, N) {
   ##########################################################################
   ## A function for calculating the KS FDR-corrected p-value              ##
   ## for a list of compounds given an ordered list of differentially      ##
