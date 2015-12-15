@@ -27,7 +27,7 @@ repo <- function(deg.vector, comp.list, N) {
   out[,2] <- sapply(comp.list, function(x) ks_single(deg.vector,x))
   #p value calculation
   boot.matrix <- boot_ks(deg.vector, comp.list, N)
-  out[,3] <- boot_p(out[,1],out[,2],boot.matrix,'lt')
+  out[,3] <- boot_p(out[,1],out[,2],boot.matrix)
   out[,4] <- p.adjust(out[,3],'fdr')
   
   #Return
