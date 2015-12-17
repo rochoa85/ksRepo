@@ -15,7 +15,7 @@ CTD.list <- vector(mode = 'list', length = length(comps)) # Initialize
 names(CTD.list) <- comps # Initialize
 
 for (i in 1:length(comps)) {
-  CTD.list[[i]] <- CTD$GeneID[which(CTD$ChemicalName == comps[i])] # Make output
+  CTD.list[[i]] <- CTD$GeneSymbol[which(CTD$ChemicalName == comps[i])] # Make output
 }
 
 CTD.list <- lapply(CTD.list, unique) # Trim

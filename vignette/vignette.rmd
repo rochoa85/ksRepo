@@ -1,0 +1,79 @@
+---
+title: "ksRepo Vignette"
+author: "Adam Brown"
+date: "December 16, 2015"
+output: html_document
+---
+
+```{r init, echo=F}
+# Change if recompiling to suit your directory architecture
+source('../functions/ksRepo.R')
+```
+
+## Introduction
+
+The `ksRepo` R file contains methods for conducting generalized Kolmogorov-Smirnov enrichment testing using user-specified case-control gene expression **instances** and gene-compound interaction **signatures**. ksRepo is implemented in a series of four functions in the R statistical environment under a BSD3 license. Source code is freely available at http://github.com/adam-sam-brown/ksRepo.
+
+This vignette has been compiled using [R Studio](https://www.rstudio.com/), and can be recompiled on demand using the `knitr` package in R (see the package description [here](https://cran.r-project.org/web/packages/knitr/index.html)) or through the R Studio GUI. If compiling, please be sure to download the entire repository.
+
+The `ksRepo` functions can be loaded from the ksRepo directory using `source('functions/ksRepo.R')`.
+
+## Example - Prostate Cancer Expression Dataset
+
+In this example, we will walk through the basics of using the `ksRepo` package. The first steps in beginning a `ksRepo` analysis are to define the **instance** of interest and the database that contains the **signatures** to be tested for enrichment. In this example, we will use the prostate cancer dataset [GSE6919](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE6919) that is available from the [Gene Expression Omnibus](http://www.ncbi.nlm.nih.gov/geo/) (GEO). For this example, we will use the built-in GEO tool [GEO2R](http://www.ncbi.nlm.nih.gov/geo/), the output of which is found in the `vignette/` subdirectory. **Instances** are prepared as shown below:
+
+```{r GEO2R}
+# Read the GEO Output
+GEO2R <- read.table('6919_GEO2R.txt',header = T, stringsAsFactors = F)
+
+# Examine the structure
+head(GEO2R)
+
+# Looks like it's already sorted by p-value, so just get the gene symbols
+instance <- GEO2R$Gene.symbol
+
+# Remove missing genes - these are not annotated by the manufacturer and must be excluded!
+instance <- instance[!(instance == '')]
+
+# Take a look - we now have a character vector of genes sorted by differential expression.
+head(instance)
+```
+
+After setting up our **instance**, we need to define a database from which we can draw gene-compound interaction **signatures**. For this purpose we choose the [Comparative Toxicogenomics Database](http://ctdbase.org/), which contains expert curated gene signatures for a large number of compounds. After downloading the [compressed database](http://ctdbase.org/reports/CTD_chem_gene_ixns.csv.gz) (CTD) and unzipping it (making sure to remove the non-csv header of course!), we can run the `CTDget.R` script from the `ksRepo/scripts` directory. Take a look if you'd like to understand more about how to generate the **signature** input for `ksRepo`.
+
+```{r CTD}
+# We provide a script, CTDget.R that will produce a ksRepo-compatible database from the raw CTD output. Let's load a prerun of the script to save time. The command used is below:
+# source('../scripts/CTDget.R')
+load('CTD.RData')
+
+# Let's take a quick look at the objects created by this script
+head(CTD)
+
+# The CTD object contains the full unfiltered database, with over 1.1M interactions. But we just want the human-verified annotations!
+head(CTD.human)
+
+# Which we can see has almost 500K interactions. Now, let's take a look at the fully formatted ksRepo-compatible output.
+head(CTD.list)
+
+# So our final output has 7,963 individual compounds that have almost 500K gene interactors.
+```
+
+With both our **instance** and database of **signatures** we're now ready to run the full analysis. The only consideration left is to determine `N`, the number of resamples to be calculated. Depending on whether this is being run locally or on a cluster with a good processor and lots of memory, we recommend between 10K and 1M resamples. For this example, we'll use 10K to ensure that you can recompile on a personal computer.
+
+```{r repo}
+# Let's run the analysis - it's as easy as plugging in our instance and signature database, along with our chosen N. Again, we'll load a prerun to save time, but the command used is below:
+# repo6919 <- repo(instance, CTD.list, 10000)
+load('repo6919.RData')
+
+# Let's take a look at the output of repo. We removed cases where the gene-compound list was greater than the number of unique genes measured by the instance.
+head(repo6919)
+
+# As we can see, the output provides several key pieces of information. The KS score, the bootstrapped p-value and the FDR-adjusted p-value. Of the three, the FDR-adjusted p-value is the one we'll use to determine significance.
+
+# Let's look at the repo output and see how we fared for predicting known prostate cancer drugs.
+rows <- c(2099,5071,4369,7155,3221,1650,3399)
+repo6919[rows,]
+
+# Of the 7 prostate cancer drugs, this instance correctly identifies 3 as significant. 
+
+```

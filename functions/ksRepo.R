@@ -4,13 +4,13 @@ repo <- function(deg.vector, comp.list, N) {
   ## for a list of compounds given an ordered list of differentially      ##
   ## expressed genes                                                      ##
   ## In:                                                                  ##
-  ## N - the number of resamples to be analyzed  			  ##
+  ## N - the number of resamples to be analyzed  			                    ##
   ## deg.vector - a character vector of differentially expressed genes    ##
   ##              ordered by significance (gene IDs must match comp.list) ##
   ## comp.list - a named list of genes associated with each               ##
   ##             compound (gene IDs must match deg.vector)                ##
-  ##									  ##
-  ## Out:								  ##
+  ##									                                                    ##
+  ## Out:								                                                  ##
   ## A Cx4 matrix, where C is the number of compounds in comp.list        ##
   ##    -len gives the number of genes associated with each compound      ##
   ##    -ks gives the raw ks statistic                                    ##
@@ -36,14 +36,14 @@ repo <- function(deg.vector, comp.list, N) {
 
 ks_single <- function(src, eval) {
   ##########################################################################
-  ## A function for calculating the KS values for an unordered list	  ##
-  ## of items (eval) from an ordered list of items (src)		  ##
+  ## A function for calculating the KS values for an unordered list	      ##
+  ## of items (eval) from an ordered list of items (src)		              ##
   ## In:                                                                  ##
-  ## src - an ordered character vector of DEGs				  ##
+  ## src - an ordered character vector of DEGs				                    ##
   ## eval - an unordered character vector of compound-associated genes    ##
   ##                                                                      ##
   ## Out:                                                                 ##
-  ## An uncorrected KS-score						  ##
+  ## An uncorrected KS-score						                                  ##
   ##########################################################################
 
   #Initialize KS
@@ -85,7 +85,7 @@ boot_ks <- function(deg.vector, comp.list, N) {
   ## A function for resampling and computing KS scores given an ordered   ##
   ## vector of genes and a list of compound gene interactions             ##
   ## In:                                                                  ##
-  ## N - the number of resamples to be analyzed  			  ##
+  ## N - the number of resamples to be analyzed  			                    ##
   ## deg.vector - a vector of differentially expressed genes ordered by   ##
   ##              significance (ID type must match comp.list)             ##
   ## comp.list - a named list of genes associated with each               ##
@@ -93,9 +93,9 @@ boot_ks <- function(deg.vector, comp.list, N) {
   ##                                                                      ##
   ## Out:                                                                 ##
   ## An N x M matrix containing KS values where M is the length of the    ##
-  ## longest gene-list in comp.list					  ##
-  ## 									  ##
-  ## Required functions: ks.R						  ##
+  ## longest gene-list in comp.list					                              ##
+  ## 									                                                    ##
+  ## Required functions: ks.R						                                  ##
   ##########################################################################
 
   #Set M and possible t's
@@ -111,6 +111,8 @@ boot_ks <- function(deg.vector, comp.list, N) {
 
   #Bootstrap for all possible t's
   for (t in t.vector) {
+    # Ensure t is < length(pool)
+    if (t > length(pool)) next
     #Generate samples
     samples <- replicate(N,sample(pool,t))
     
@@ -133,16 +135,16 @@ boot_ks <- function(deg.vector, comp.list, N) {
 
 boot_p <- function(len.vector, stat.vector, boot.matrix) {
   ##########################################################################
-  ## A function for calculating p-values from raw ks scores given 	  ##
-  ## a resample matrix of ks scores 			                  ##
+  ## A function for calculating p-values from raw ks scores given 	      ##
+  ## a resample matrix of ks scores 			                                ##
   ## In:                                                                  ##
   ## len.vector - a vector of compound-associated gene list lengths       ##
   ## stat.vector - a vector of compound-associated ks scores              ##
-  ## boot.matrix - output of boot_ks				          ##
+  ## boot.matrix - output of boot_ks				                              ##
   ##                                                                      ##
   ## Out:                                                                 ##
   ## A vector of uncorrected, bootstrapped p-values                       ##
-  ## 									  ##
+  ## 									                                                    ##
   ##########################################################################
 
   #Determine bootnum
